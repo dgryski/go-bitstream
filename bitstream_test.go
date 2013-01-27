@@ -28,6 +28,6 @@ func TestStream(t *testing.T) {
 	s := buf.String()
 
 	if s != "hello" {
-		t.Error("got s=%s expected 'hello'", s)
+		t.Error("expected 'hello', got=", s)
 	}
 }
