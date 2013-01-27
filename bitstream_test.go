@@ -14,7 +14,7 @@ func TestStream(t *testing.T) {
 	bw := NewWriter(buf)
 
 	for {
-		bit, err := br.GetBit()
+		bit, err := br.ReadBit()
 		if err == io.EOF {
 			break
 		}
@@ -22,7 +22,7 @@ func TestStream(t *testing.T) {
 			t.Error("GetBit returned error err=", err.Error())
 			return
 		}
-		bw.PutBit(bit)
+		bw.WriteBit(bit)
 	}
 
 	s := buf.String()
