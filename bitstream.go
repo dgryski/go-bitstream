@@ -80,6 +80,53 @@ func (b *BitWriter) WriteBit(bit Bit) error {
 	return nil
 }
 
+// WriteByte writes a single byte to the stream, regardless of alignment
+func (b *BitWriter) WriteByte(byt byte) error {
+
+	if b.count == 0 {
+		b.b[0] = byt
+
+		if n, err := b.w.Write(b.b[:]); n != 1 || err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	// fill up b.b with b.count bits from byt
+	b.b[0] |= byt >> (8 - b.count)
+
+	if n, err := b.w.Write(b.b[:]); n != 1 || err != nil {
+		return err
+	}
+	b.b[0] = byt << b.count
+
+	return nil
+}
+
+// ReadByte writes a single byte to the stream, regardless of alignment
+func (b *BitReader) ReadByte() (byte, error) {
+
+	if b.count == 0 {
+		if n, err := b.r.Read(b.b[:]); n != 1 || err != nil {
+			return 0, err
+		}
+		return b.b[0], nil
+	}
+
+	byt := b.b[0]
+
+	if n, err := b.r.Read(b.b[:]); n != 1 || err != nil {
+		return 0, err
+	}
+
+	byt |= b.b[0] >> b.count
+
+	b.b[0] <<= (8 - b.count)
+
+	return byt, nil
+}
+
 // Flush empties the currently in-process byte by filling it with 'bit'.
 func (b *BitWriter) Flush(bit Bit) {
 
