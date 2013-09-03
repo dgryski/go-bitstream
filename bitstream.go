@@ -1,23 +1,28 @@
-/* dbitstream is a simple wrapper around a io.Reader and io.Writer to provide bit-level access to the stream. */
+// Package dbitstream is a simple wrapper around a io.Reader and io.Writer to provide bit-level access to the stream.
 package dbitstream
 
 import (
 	"io"
 )
 
+// A Bit is a zero or a one
 type Bit bool
 
 const (
+	// Zero is our exported type for '0' bits
 	Zero Bit = false
-	One      = true
+	// One is our exported type for '1' bits
+	One = true
 )
 
+// A BitReader reads bits from an io.Reader
 type BitReader struct {
 	r     io.Reader
 	b     [1]byte
 	count uint8
 }
 
+// A BitWriter writes bits to an io.Writer
 type BitWriter struct {
 	w     io.Writer
 	b     [1]byte
