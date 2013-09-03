@@ -12,13 +12,6 @@ const (
 	One      = true
 )
 
-/*
-type BitStream struct {
-	rc io.ReadCloser
-	wc io.WriteCloser
-}
-*/
-
 type BitReader struct {
 	r     io.Reader
 	b     [1]byte
@@ -82,16 +75,6 @@ func (b *BitWriter) WriteBit(bit Bit) error {
 
 // WriteByte writes a single byte to the stream, regardless of alignment
 func (b *BitWriter) WriteByte(byt byte) error {
-
-	if b.count == 0 {
-		b.b[0] = byt
-
-		if n, err := b.w.Write(b.b[:]); n != 1 || err != nil {
-			return err
-		}
-
-		return nil
-	}
 
 	// fill up b.b with b.count bits from byt
 	b.b[0] |= byt >> (8 - b.count)
