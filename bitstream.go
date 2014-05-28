@@ -92,7 +92,7 @@ func (b *BitWriter) WriteByte(byt byte) error {
 	return nil
 }
 
-// ReadByte writes a single byte to the stream, regardless of alignment
+// ReadByte reads a single byte from the stream, regardless of alignment
 func (b *BitReader) ReadByte() (byte, error) {
 
 	if b.count == 0 {
