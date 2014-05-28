@@ -1,4 +1,4 @@
-package dbitstream
+package bitstream
 
 import (
 	"bytes"
