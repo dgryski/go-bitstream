@@ -119,8 +119,8 @@ func (b *BitReader) ReadByte() (byte, error) {
 	return byt, err
 }
 
-// ReadU64 reads  nbits from the stream
-func (b *BitReader) ReadU64(nbits int) (uint64, error) {
+// ReadBits reads  nbits from the stream
+func (b *BitReader) ReadBits(nbits int) (uint64, error) {
 
 	var u uint64
 
@@ -160,8 +160,8 @@ func (b *BitWriter) Flush(bit Bit) {
 	return
 }
 
-// WriteU64 writes the nbits least significant bits of u, most-significant-bit first.
-func (b *BitWriter) WriteU64(u uint64, nbits int) {
+// WriteBits writes the nbits least significant bits of u, most-significant-bit first.
+func (b *BitWriter) WriteBits(u uint64, nbits int) {
 	u <<= (64 - uint(nbits))
 	for nbits >= 8 {
 		byt := byte(u >> 56)

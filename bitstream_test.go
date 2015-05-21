@@ -114,16 +114,16 @@ func TestByteStream(t *testing.T) {
 		bw.WriteByte(byt)
 	}
 
-	u, err := br.ReadU64(13)
+	u, err := br.ReadBits(13)
 
 	if err != nil {
-		t.Error("ReadU64 returned error err=", err.Error())
+		t.Error("ReadBits returned error err=", err.Error())
 		return
 	}
 
-	bw.WriteU64(u, 13)
+	bw.WriteBits(u, 13)
 
-	bw.WriteU64(('!'<<12)|('.'<<4)|0x02, 20)
+	bw.WriteBits(('!'<<12)|('.'<<4)|0x02, 20)
 	// 0x2f == '/'
 	bw.Flush(One)
 
