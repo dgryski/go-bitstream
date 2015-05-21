@@ -102,7 +102,7 @@ func TestByteStream(t *testing.T) {
 		bw.WriteBit(bit)
 	}
 
-	for i := 0; i < 4; i++ {
+	for i := 0; i < 3; i++ {
 		byt, err := br.ReadByte()
 		if err == io.EOF {
 			break
@@ -114,17 +114,14 @@ func TestByteStream(t *testing.T) {
 		bw.WriteByte(byt)
 	}
 
-	for i := 0; i < 5; i++ {
-		bit, err := br.ReadBit()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			t.Error("GetBit returned error err=", err.Error())
-			return
-		}
-		bw.WriteBit(bit)
+	u, err := br.ReadU64(13)
+
+	if err != nil {
+		t.Error("ReadU64 returned error err=", err.Error())
+		return
 	}
+
+	bw.WriteU64(u, 13)
 
 	bw.WriteU64(('!'<<12)|('.'<<4)|0x02, 20)
 	// 0x2f == '/'
