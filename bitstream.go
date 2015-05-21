@@ -39,7 +39,7 @@ func NewReader(r io.Reader) *BitReader {
 // ReadBit returns the next bit from the stream, reading a new byte from the underlying reader if required.
 func (b *BitReader) ReadBit() (Bit, error) {
 	if b.count == 0 {
-		if n, err := b.r.Read(b.b[:]); n != 1 || err != nil {
+		if n, err := b.r.Read(b.b[:]); n != 1 || (err != nil && err != io.EOF) {
 			return Zero, err
 		}
 		b.count = 8
@@ -96,15 +96,19 @@ func (b *BitWriter) WriteByte(byt byte) error {
 func (b *BitReader) ReadByte() (byte, error) {
 
 	if b.count == 0 {
-		if n, err := b.r.Read(b.b[:]); n != 1 || err != nil {
-			return 0, err
+		n, err := b.r.Read(b.b[:])
+		if n == 0 {
+			b.b[0] = 0
 		}
-		return b.b[0], nil
+		return b.b[0], err
 	}
 
 	byt := b.b[0]
 
-	if n, err := b.r.Read(b.b[:]); n != 1 || err != nil {
+	var n int
+	var err error
+	n, err = b.r.Read(b.b[:])
+	if n != 1 || (err != nil && err != io.EOF) {
 		return 0, err
 	}
 
@@ -112,7 +116,7 @@ func (b *BitReader) ReadByte() (byte, error) {
 
 	b.b[0] <<= (8 - b.count)
 
-	return byt, nil
+	return byt, err
 }
 
 // Flush empties the currently in-process byte by filling it with 'bit'.
