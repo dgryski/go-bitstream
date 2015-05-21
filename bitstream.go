@@ -119,6 +119,37 @@ func (b *BitReader) ReadByte() (byte, error) {
 	return byt, err
 }
 
+// ReadU64 reads  nbits from the stream
+func (b *BitReader) ReadU64(nbits int) (uint64, error) {
+
+	var u uint64
+
+	for nbits >= 8 {
+		byt, err := b.ReadByte()
+		if err != nil {
+			return 0, err
+		}
+
+		u = (u << 8) | uint64(byt)
+		nbits -= 8
+	}
+
+	var err error
+	for nbits > 0 && err != io.EOF {
+		byt, err := b.ReadBit()
+		if err != nil {
+			return 0, err
+		}
+		u <<= 1
+		if byt {
+			u |= 1
+		}
+		nbits--
+	}
+
+	return u, nil
+}
+
 // Flush empties the currently in-process byte by filling it with 'bit'.
 func (b *BitWriter) Flush(bit Bit) {
 
@@ -127,4 +158,21 @@ func (b *BitWriter) Flush(bit Bit) {
 	}
 
 	return
+}
+
+// WriteU64 writes the nbits least significant bits of u, most-significant-bit first.
+func (b *BitWriter) WriteU64(u uint64, nbits int) {
+	u <<= (64 - uint(nbits))
+	for nbits >= 8 {
+		byt := byte(u >> 56)
+		b.WriteByte(byt)
+		u <<= 8
+		nbits -= 8
+	}
+
+	for nbits > 0 {
+		b.WriteBit((u >> 63) == 1)
+		u <<= 1
+		nbits--
+	}
 }

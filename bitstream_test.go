@@ -126,9 +126,13 @@ func TestByteStream(t *testing.T) {
 		bw.WriteBit(bit)
 	}
 
+	bw.WriteU64(('!'<<12)|('.'<<4)|0x02, 20)
+	// 0x2f == '/'
+	bw.Flush(One)
+
 	s := buf.String()
 
-	if s != "hello" {
-		t.Error("expected 'hello', got=", []byte(s))
+	if s != "hello!./" {
+		t.Errorf("expected 'hello!./', got=%x", []byte(s))
 	}
 }
