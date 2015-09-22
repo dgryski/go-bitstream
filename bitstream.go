@@ -58,6 +58,15 @@ func NewWriter(w io.Writer) *BitWriter {
 	return b
 }
 
+func (b *BitWriter) Pending() (byt byte, vals uint8) {
+	return b.b[0], b.count
+}
+
+func (b *BitWriter) Resume(data byte, count uint8) {
+	b.b[0] = data
+	b.count = count
+}
+
 // WriteBit writes a single bit to the stream, writing a new byte to 'w' if required.
 func (b *BitWriter) WriteBit(bit Bit) error {
 
