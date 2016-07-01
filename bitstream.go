@@ -160,28 +160,39 @@ func (b *BitReader) ReadBits(nbits int) (uint64, error) {
 }
 
 // Flush empties the currently in-process byte by filling it with 'bit'.
-func (b *BitWriter) Flush(bit Bit) {
+func (b *BitWriter) Flush(bit Bit) error {
 
 	for b.count != 8 {
-		b.WriteBit(bit)
+		err := b.WriteBit(bit)
+		if err != nil {
+			return err
+		}
 	}
 
-	return
+	return nil
 }
 
 // WriteBits writes the nbits least significant bits of u, most-significant-bit first.
-func (b *BitWriter) WriteBits(u uint64, nbits int) {
+func (b *BitWriter) WriteBits(u uint64, nbits int) error {
 	u <<= (64 - uint(nbits))
 	for nbits >= 8 {
 		byt := byte(u >> 56)
-		b.WriteByte(byt)
+		err := b.WriteByte(byt)
+		if err != nil {
+			return err
+		}
 		u <<= 8
 		nbits -= 8
 	}
 
 	for nbits > 0 {
-		b.WriteBit((u >> 63) == 1)
+		err := b.WriteBit((u >> 63) == 1)
+		if err != nil {
+			return err
+		}
 		u <<= 1
 		nbits--
 	}
+
+	return nil
 }

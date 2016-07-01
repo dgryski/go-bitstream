@@ -2,6 +2,7 @@ package bitstream
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"strings"
 	"testing"
@@ -36,7 +37,10 @@ func TestBitStreamEOF(t *testing.T) {
 			t.Error("GetBit returned error err=", err.Error())
 			return
 		}
-		bw.WriteBit(bit)
+		err = bw.WriteBit(bit)
+		if err != nil {
+			t.Errorf("unexpected writer error")
+		}
 	}
 
 	bw.Flush(One)
@@ -74,7 +78,10 @@ func TestBitStream(t *testing.T) {
 			t.Error("GetBit returned error err=", err.Error())
 			return
 		}
-		bw.WriteBit(bit)
+		err = bw.WriteBit(bit)
+		if err != nil {
+			t.Errorf("unexpected writer error")
+		}
 	}
 
 	s := buf.String()
@@ -99,7 +106,10 @@ func TestByteStream(t *testing.T) {
 			t.Error("GetBit returned error err=", err.Error())
 			return
 		}
-		bw.WriteBit(bit)
+		err = bw.WriteBit(bit)
+		if err != nil {
+			t.Errorf("unexpected writer error")
+		}
 	}
 
 	for i := 0; i < 3; i++ {
@@ -121,9 +131,15 @@ func TestByteStream(t *testing.T) {
 		return
 	}
 
-	bw.WriteBits(u, 13)
+	err = bw.WriteBits(u, 13)
+	if err != nil {
+		t.Errorf("unexpected writer error")
+	}
 
-	bw.WriteBits(('!'<<12)|('.'<<4)|0x02, 20)
+	err = bw.WriteBits(('!'<<12)|('.'<<4)|0x02, 20)
+	if err != nil {
+		t.Errorf("unexpected writer error")
+	}
 	// 0x2f == '/'
 	bw.Flush(One)
 
@@ -131,5 +147,36 @@ func TestByteStream(t *testing.T) {
 
 	if s != "hello!./" {
 		t.Errorf("expected 'hello!./', got=%x", []byte(s))
+	}
+}
+
+var myError error = fmt.Errorf("my error")
+
+type badWriter struct{}
+
+func (w *badWriter) Write(p []byte) (n int, err error) {
+	return 0, myError
+}
+func TestErrorPropagation(t *testing.T) {
+	// check WriteBit
+	w := &badWriter{}
+	bw := NewWriter(w)
+	for i := 0; i < 7; i++ {
+		err := bw.WriteBit(One)
+		if err != nil {
+			t.Errorf("unexpected error during buffered write operation")
+		}
+	}
+	err := bw.WriteBit(One)
+	if err != myError {
+		t.Errorf("failed to propagate error")
+	}
+
+	// check WriteBits
+	w = &badWriter{}
+	bw = NewWriter(w)
+	err = bw.WriteBits(256, 8)
+	if err != myError {
+		t.Errorf("failed to propagate error")
 	}
 }
