@@ -106,11 +106,15 @@ func (b *BitReader) ReadByte() (byte, error) {
 
 	if b.count == 0 {
 		n, err := b.r.Read(b.b[:])
-		if n == 0 {
+		if n != 1 || (err != nil && err != io.EOF) {
 			b.b[0] = 0
 			return b.b[0], err
 		}
-		return b.b[0], nil
+		// mask io.EOF for the last byte
+		if err == io.EOF {
+			err = nil
+		}
+		return b.b[0], err
 	}
 
 	byt := b.b[0]
