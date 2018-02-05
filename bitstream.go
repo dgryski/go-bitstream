@@ -197,3 +197,21 @@ func (b *BitWriter) WriteBits(u uint64, nbits int) error {
 
 	return nil
 }
+
+// Reset replaces the underlying io.Reader with the provided reader and resets
+// all interal state to its zero value, allowing for reuse of the BitReader
+// without additional allocations
+func (b *BitReader) Reset(r io.Reader) {
+	b.r = r
+	b.b[0] = 0x00
+	b.count = 0
+}
+
+// Reset replaces the underlying io.Writer with the provided writer and resets
+// all internal state to its initial value allowing for reuse of the BitWriter
+// without additional allocations
+func (b *BitWriter) Reset(w io.Writer) {
+	b.w = w
+	b.b[0] = 0x00
+	b.count = 8
+}

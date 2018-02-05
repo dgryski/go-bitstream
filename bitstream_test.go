@@ -206,3 +206,34 @@ func TestErrorPropagation(t *testing.T) {
 		t.Errorf("failed to propagate error")
 	}
 }
+
+func TestReset(t *testing.T) {
+	r := NewReader(strings.NewReader("abc"))
+	b, _ := r.ReadBits(8)
+	if b != 'a' {
+		t.Errorf("expected 'a', got=%08b", b)
+	}
+
+	r.Reset(strings.NewReader("def"))
+	b, _ = r.ReadBits(8)
+
+	if b != 'd' {
+		t.Errorf("expected 'd', got=%08b", b)
+	}
+
+	firstWriter := bytes.NewBuffer(nil)
+	w := NewWriter(firstWriter)
+	w.WriteBits(97, 8)
+
+	secondWriter := bytes.NewBuffer(nil)
+	w.Reset(secondWriter)
+	w.WriteBits(98, 8)
+
+	if firstWriter.String() != "a" {
+		t.Errorf("expected 'a', got=%x", firstWriter.Bytes())
+	}
+
+	if secondWriter.String() != "b" {
+		t.Errorf("expected 'b', got=%x", secondWriter.Bytes())
+	}
+}
