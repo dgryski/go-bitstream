@@ -63,6 +63,32 @@ func TestBitStreamEOF(t *testing.T) {
 
 }
 
+// reader that returns a single byte with EOF
+type eofReader struct {
+	readCalled bool
+}
+
+func (e *eofReader) Read(p []byte) (int, error) {
+	if e.readCalled {
+		return 0, io.EOF
+	}
+	e.readCalled = true
+	p[0] = 'A'
+	return 1, io.EOF
+}
+
+func TestBitStreamReadEOF(t *testing.T) {
+
+	br := NewReader(&eofReader{})
+
+	r, _ := br.ReadBits(8)
+
+	if r != 'A' {
+		t.Errorf("failed to read single byte with EOF: %08b", r)
+	}
+
+}
+
 func TestBitStream(t *testing.T) {
 
 	buf := bytes.NewBuffer(nil)

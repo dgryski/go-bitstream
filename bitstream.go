@@ -108,8 +108,9 @@ func (b *BitReader) ReadByte() (byte, error) {
 		n, err := b.r.Read(b.b[:])
 		if n == 0 {
 			b.b[0] = 0
+			return b.b[0], err
 		}
-		return b.b[0], err
+		return b.b[0], nil
 	}
 
 	byt := b.b[0]
