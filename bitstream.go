@@ -12,7 +12,7 @@ const (
 	// Zero is our exported type for '0' bits
 	Zero Bit = false
 	// One is our exported type for '1' bits
-	One = true
+	One Bit = true
 )
 
 // A BitReader reads bits from an io.Reader
