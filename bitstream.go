@@ -164,6 +164,11 @@ func (b *BitReader) ReadBits(nbits int) (uint64, error) {
 	return u, nil
 }
 
+// Align the reader to the next byte boundary.
+func (b *BitReader) Align() {
+	b.count = 0
+}
+
 // Flush empties the currently in-process byte by filling it with 'bit'.
 func (b *BitWriter) Flush(bit Bit) error {
 

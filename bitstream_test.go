@@ -237,3 +237,16 @@ func TestReset(t *testing.T) {
 		t.Errorf("expected 'b', got=%x", secondWriter.Bytes())
 	}
 }
+
+func TestAlign(t *testing.T) {
+	r := NewReader(bytes.NewBuffer([]byte{0xf0, 0xf0}))
+	b, _ := r.ReadBits(4)
+	if b != 0xf {
+		t.Errorf("expected '0xf', got=%08b", b)
+	}
+	r.Align()
+	b, _ = r.ReadBits(4)
+	if b != 0xf {
+		t.Errorf("expected '0xf', got=%08b", b)
+	}
+}
