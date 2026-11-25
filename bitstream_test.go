@@ -6,6 +6,7 @@ import (
 	"io"
 	"strings"
 	"testing"
+	"testing/iotest"
 )
 
 func TestBitStreamEOF(t *testing.T) {
@@ -87,6 +88,44 @@ func TestBitStreamReadEOF(t *testing.T) {
 		t.Errorf("failed to read single byte with EOF: %08b", r)
 	}
 
+}
+
+func TestReadFinalByteWithEOF(t *testing.T) {
+	for _, method := range []string{"ReadByte", "ReadBits"} {
+		for offset := 0; offset <= 8; offset++ {
+			name := fmt.Sprintf("%s after %d bits", method, offset)
+			r := NewReader(iotest.DataErrReader(bytes.NewReader([]byte{0xf0, 0x1f})))
+			prefix, err := r.ReadBits(offset)
+			wantPrefix := uint64(0xf01f) >> uint(16-offset)
+			if err != nil || prefix != wantPrefix {
+				t.Fatalf("%s: prefix = %#x, %v; want %#x, nil", name, prefix, err, wantPrefix)
+			}
+
+			var got uint64
+			if method == "ReadByte" {
+				var byt byte
+				byt, err = r.ReadByte()
+				got = uint64(byt)
+			} else {
+				got, err = r.ReadBits(8)
+			}
+			want := (uint64(0xf01f) >> uint(8-offset)) & 0xff
+			if err != nil || got != want {
+				t.Errorf("%s: got %#x, %v; want %#x, nil", name, got, err, want)
+				continue
+			}
+
+			remaining := 8 - offset
+			suffix, err := r.ReadBits(remaining)
+			wantSuffix := uint64(0xf01f) & ((1 << uint(remaining)) - 1)
+			if err != nil || suffix != wantSuffix {
+				t.Errorf("%s: remaining bits = %#x, %v; want %#x, nil", name, suffix, err, wantSuffix)
+			}
+			if _, err := r.ReadBit(); err != io.EOF {
+				t.Errorf("%s: error after final bit = %v; want EOF", name, err)
+			}
+		}
+	}
 }
 
 func TestBitStream(t *testing.T) {
