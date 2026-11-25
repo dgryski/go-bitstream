@@ -130,7 +130,7 @@ func (b *BitReader) ReadByte() (byte, error) {
 
 	b.b[0] <<= (8 - b.count)
 
-	return byt, err
+	return byt, nil
 }
 
 // ReadBits reads  nbits from the stream
